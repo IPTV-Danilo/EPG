@@ -1,29 +1,30 @@
-from datetime import datetime
-
 def merge_epg(telered_data, gatotv_data):
     """
-    Combina los datos de ambas fuentes.
-    Si un mismo canal y horario tienen programas distintos:
-    - Priorizamos GatoTV porque suele tener más detalles, pero conservamos el de TeleRed como alternativa.
-    Retorna un dict con key (canal, start_time) y el mejor programa.
+    Fusiona datos de ambas fuentes
+    Prioridad: GatoTV (más completo), complementa con TeleRed
     """
     merged = {}
     
-    # Primero cargamos GatoTV (prioritario)
+    # Primero cargar GatoTV (prioritario)
     for prog in gatotv_data:
-        key = (prog['channel'], prog['start'].timestamp())
+        key = (prog['channel'], prog['start'].isoformat())
         merged[key] = prog.copy()
+        merged[key]['source'] = 'gatotv_primary'
     
-    # Luego agregamos TeleRed solo si no existe o si tiene más información (duración más precisa, etc.)
+    # Luego agregar TeleRed donde no exista
     for prog in telered_data:
-        key = (prog['channel'], prog['start'].timestamp())
+        key = (prog['channel'], prog['start'].isoformat())
         if key not in merged:
             merged[key] = prog.copy()
+            merged[key]['source'] = 'telered_secondary'
         else:
-            # Si ya existe, complementamos datos (ej: descripción si la tuviera)
-            if 'description' not in merged[key] and 'description' in prog:
-                merged[key]['description'] = prog['description']
-            merged[key]['source'] = 'merged'
+            # Si existe, complementar información
+            if len(prog['title']) > len(merged[key]['title']):
+                merged[key]['title'] = prog['title']
     
-    # Ordenar por canal y hora
-    return sorted(merged.values(), key=lambda x: (x['channel'], x['start']))
+    # Convertir a lista y ordenar
+    result = list(merged.values())
+    result.sort(key=lambda x: (x['channel'], x['start']))
+    
+    print(f"🔗 Fusión completada: {len(result)} programas únicos")
+    return result
