@@ -1,30 +1,46 @@
-from src.scrapers.telered import scrape_telered
-from src.scrapers.gatotv import scrape_gatotv
-from src.merger import merge_epg
-from src.xmltv_generator import generar_xmltv
-import logging
+#!/usr/bin/env python3
+import sys
+import os
+from datetime import datetime
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Agregar src al path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+
+from scrapers.telered import scrape_telered
+from scrapers.gatotv import scrape_gatotv
+from merger import merge_epg
+from xmltv_generator import generar_xmltv
 
 def main():
-    logging.info("Iniciando extracción de EPG...")
+    print("=" * 60)
+    print(f"🚀 Iniciando EPG Argentina - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("=" * 60)
     
-    logging.info("Scraping TeleRed...")
+    # Scraping
+    print("\n📡 1. Extrayendo datos de TeleRed...")
     telered_data = scrape_telered()
-    logging.info(f"Obtenidos {len(telered_data)} programas de TeleRed")
+    print(f"   ✓ {len(telered_data)} programas")
     
-    logging.info("Scraping GatoTV...")
+    print("\n📺 2. Extrayendo datos de GatoTV...")
     gatotv_data = scrape_gatotv()
-    logging.info(f"Obtenidos {len(gatotv_data)} programas de GatoTV")
+    print(f"   ✓ {len(gatotv_data)} programas")
     
-    logging.info("Fusionando ambas fuentes...")
+    # Fusión
+    print("\n🔗 3. Fusionando ambas fuentes...")
     epg_completo = merge_epg(telered_data, gatotv_data)
-    logging.info(f"Total después de fusión: {len(epg_completo)} programas")
     
-    logging.info("Generando archivo XMLTV...")
+    # Generar XML
+    print("\n💾 4. Generando archivo XMLTV...")
     generar_xmltv(epg_completo)
     
-    logging.info("Proceso completado.")
+    print("\n✅ Proceso completado exitosamente!")
+    print("=" * 60)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
