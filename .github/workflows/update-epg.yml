@@ -1,0 +1,27 @@
+name: Actualizar EPG cada 2 horas
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'   # Cada 2 horas
+  workflow_dispatch:         # También manual
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Configurar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Instalar dependencias
+      run: pip install -r requirements.txt
+    - name: Ejecutar scraper
+      run: python run.py
+    - name: Commit y push de los archivos generados
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add data/epg.xml
+        git diff --quiet && git diff --staged --quiet || git commit -m "Actualización automática EPG $(date)"
+        git push
