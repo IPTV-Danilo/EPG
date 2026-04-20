@@ -1,0 +1,22 @@
+# Core dependencies
+requests==2.31.0
+beautifulsoup4==4.12.2
+lxml==4.9.3
+html5lib==1.1
+
+# Data processing
+python-dateutil==2.8.2
+pytz==2023.3
+pandas==2.0.3
+
+# Utilities
+colorama==0.4.6
+tqdm==4.66.1
+schedule==1.2.0
+
+# Testing
+pytest==7.4.0
+pytest-cov==4.1.0
+
+# Monitoring
+sentry-sdk==1.32.0
